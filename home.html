@@ -1,1 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* (Previous CSS styles remain exactly the same) */
+    </style>
+</head>
+<body>
+    <!-- (Previous HTML structure remains exactly the same) -->
 
+    <script>
+        // Data Storage Keys
+        const STORAGE_KEYS = {
+            PROFILE: 'dashboard_profile_data',
+            SETTINGS: 'dashboard_settings',
+            MESSAGES: 'dashboard_messages'
+        };
+
+        // Default Data
+        const DEFAULT_DATA = {
+            profile: {
+                name: "John Doe",
+                email: "john.doe@example.com",
+                avatar: "https://via.placeholder.com/100"
+            },
+            settings: {
+                bgColor: "#f5f7fa",
+                sidebarColor: "#2c3e50",
+                notifications: "all"
+            },
+            messages: {
+                contacts: [
+                    {
+                        id: 1,
+                        name: "Sarah Johnson",
+                        avatar: "https://via.placeholder.com/40",
+                        lastMessage: "Hey, how are you?",
+                        messages: []
+                    },
+                    {
+                        id: 2,
+                        name: "Mike Peterson",
+                        avatar: "https://via.placeholder.com/40",
+                        lastMessage: "About the project...",
+                        messages: []
+                    }
+                ],
+                currentContact: 1
+            }
+        };
+
+        // Load data from storage or initialize with defaults
+        function loadPersistentData() {
+            return {
+                profile: JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFILE)) || DEFAULT_DATA.profile,
+                settings: JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || DEFAULT_DATA.settings,
+                messages: JSON.parse(localStorage.getItem(STORAGE_KEYS.MESSAGES)) || DEFAULT_DATA.messages
+            };
+        }
+
+        // Save data to storage
+        function savePersistentData(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+            // In a real app, you would also send this to your backend API
+            console.log(`Saving to server (simulated): ${key}`, data);
+        }
+
+        // Initialize application
+        function initApp() {
+            // Load all persistent data
+            const persistentData = loadPersistentData();
+            
+            // Apply settings first
+            applySettings(persistentData.settings);
+            
+            // Initialize profile section
+            initProfile(persistentData.profile);
+            
+            // Initialize messages section
+            initMessages(persistentData.messages);
+            
+            // Initialize settings section
+            initSettings(persistentData.settings);
+            
+            // Set up UI event handlers
+            setupEventHandlers();
+        }
+
+        // Apply visual settings
+        function applySettings(settings) {
+            document.documentElement.style.setProperty('--bg-color', settings.bgColor);
+            document.documentElement.style.setProperty('--sidebar-color', settings.sidebarColor);
+        }
+
+        // Profile section
+        function initProfile(profileData) {
+            // Update UI with profile data
+            document.getElementById('sidebarName').textContent = profileData.name;
+            document.getElementById('sidebarEmail').textContent = profileData.email;
+            document.getElementById('sidebarAvatar').src = profileData.avatar;
+            document.getElementById('avatarPreview').src = profileData.avatar;
+            document.getElementById('fullName').value = profileData.name;
+            document.getElementById('email').value = profileData.email;
+        }
+
+        // Messages section
+        function initMessages(messagesData) {
+            const contactsList = document.querySelector('.contacts-list');
+            contactsList.innerHTML = '';
+            
+            messagesData.contacts.forEach(contact => {
+                const contactElement = document.createElement('div');
+                contactElement.className = `contact ${contact.id === messagesData.currentContact ? 'active' : ''}`;
+                contactElement.innerHTML = `
+                    <img src="${contact.avatar}" alt="User" class="contact-avatar">
+                    <div class="contact-info">
+                        <div class="contact-name">${contact.name}</div>
+                        <div class="contact-lastmsg">${contact.lastMessage}</div>
+                    </div>
+                `;
+                contactElement.addEventListener('click', () => selectContact(contact.id));
+                contactsList.appendChild(contactElement);
+            });
+        }
+
+        // Settings section
+        function initSettings(settingsData) {
+            document.getElementById('notifications').value = settingsData.notifications;
+            
+            // Select the current color option
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.classList.remove('selected');
+                if (option.dataset.bg === settingsData.bgColor) {
+                    option.classList.add('selected');
+                }
+            });
+        }
+
+        // Event handlers setup
+        function setupEventHandlers() {
+            // Profile avatar upload
+            document.getElementById('uploadBtn').addEventListener('click', () => {
+                document.getElementById('avatarUpload').click();
+            });
+            
+            document.getElementById('avatarUpload').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file && file.size <= 2 * 1024 * 1024) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const newAvatar = event.target.result;
+                        document.getElementById('avatarPreview').src = newAvatar;
+                        
+                        // Update persistent data
+                        const profileData = loadPersistentData().profile;
+                        profileData.avatar = newAvatar;
+                        savePersistentData(STORAGE_KEYS.PROFILE, profileData);
+                        
+                        // Update sidebar avatar
+                        document.getElementById('sidebarAvatar').src = newAvatar;
+                    };
+                    reader.readAsDataURL(file);
+                } else if (file) {
+                    alert('Please select an image smaller than 2MB');
+                }
+            });
+            
+            // Profile form submission
+            document.getElementById('profileForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('fullName').value.trim();
+                const email = document.getElementById('email').value.trim();
+                
+                if (name && /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+                    const profileData = {
+                        name,
+                        email,
+                        avatar: loadPersistentData().profile.avatar
+                    };
+                    
+                    savePersistentData(STORAGE_KEYS.PROFILE, profileData);
+                    initProfile(profileData);
+                    alert('Profile updated successfully!');
+                } else {
+                    alert('Please enter valid name and email');
+                }
+            });
+            
+            // Settings form submission
+            document.getElementById('settingsForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const settingsData = {
+                    ...loadPersistentData().settings,
+                    notifications: document.getElementById('notifications').value
+                };
+                
+                savePersistentData(STORAGE_KEYS.SETTINGS, settingsData);
+                alert('Settings saved successfully!');
+            });
+            
+            // Color selection
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const settingsData = {
+                        bgColor: this.dataset.bg,
+                        sidebarColor: this.dataset.sidebar,
+                        notifications: loadPersistentData().settings.notifications
+                    };
+                    
+                    savePersistentData(STORAGE_KEYS.SETTINGS, settingsData);
+                    applySettings(settingsData);
+                    
+                    document.querySelectorAll('.color-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                });
+            });
+            
+            // Reset settings
+            document.getElementById('resetSettings').addEventListener('click', function() {
+                savePersistentData(STORAGE_KEYS.SETTINGS, DEFAULT_DATA.settings);
+                initSettings(DEFAULT_DATA.settings);
+                applySettings(DEFAULT_DATA.settings);
+            });
+            
+            // Section navigation
+            document.querySelectorAll('.sidebar-menu li[data-section]').forEach(item => {
+                item.addEventListener('click', function() {
+                    showSection(this.getAttribute('data-section'));
+                });
+            });
+            
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('Are you sure you want to logout?')) {
+                    // In a real app, you would call your logout API here
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+
+        // Show section
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.profile-content, .messages-content, .settings-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show selected section
+            document.getElementById(`${sectionId}Section`).classList.remove('hidden');
+            
+            // Update active menu item
+            document.querySelectorAll('.sidebar-menu li[data-section]').forEach(item => {
+                item.classList.remove('active-menu');
+                if (item.getAttribute('data-section') === sectionId) {
+                    item.classList.add('active-menu');
+                }
+            });
+            
+            // Update title
+            document.getElementById('sectionTitle').textContent = 
+                document.querySelector('.active-menu i').parentElement.textContent.trim();
+        }
+
+        // Select contact
+        function selectContact(contactId) {
+            const messagesData = loadPersistentData().messages;
+            messagesData.currentContact = contactId;
+            savePersistentData(STORAGE_KEYS.MESSAGES, messagesData);
+            initMessages(messagesData);
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
