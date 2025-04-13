@@ -3,282 +3,730 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>User Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* (Previous CSS styles remain exactly the same) */
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --sidebar-width: 250px;
+            --topbar-height: 60px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            background-color: #f5f5f5;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: #2c3e50;
+            color: white;
+            position: fixed;
+            padding-top: var(--topbar-height);
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+        }
+        
+        .sidebar-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-item:hover {
+            background-color: #34495e;
+        }
+        
+        .sidebar-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Topbar Styles */
+        .topbar {
+            height: var(--topbar-height);
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px 0 calc(var(--sidebar-width) + 20px);
+            z-index: 100;
+        }
+        
+        .topbar-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .topbar-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        .topbar-item {
+            margin-left: 20px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .account-balance {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        /* Dropdown Styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 5px;
+            padding: 10px 0;
+        }
+        
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        .dropdown-item {
+            padding: 10px 20px;
+            color: #333;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f1f1f1;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--topbar-height);
+            padding: 20px;
+            width: calc(100% - var(--sidebar-width));
+            min-height: calc(100vh - var(--topbar-height));
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        /* System View Styles */
+        .system-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .datetime {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .map-container {
+            height: 300px;
+            background-color: #eee;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .calendar-container {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        /* Financial Activities */
+        .financial-card {
+            background-color: white;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .transaction-history {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .transaction-amount.positive {
+            color: #2ecc71;
+        }
+        
+        .transaction-amount.negative {
+            color: #e74c3c;
+        }
     </style>
 </head>
 <body>
-    <!-- (Previous HTML structure remains exactly the same) -->
-
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <ul class="sidebar-menu">
+            <li class="sidebar-item" onclick="showProfileModal()">
+                <i class="fas fa-user"></i> Profile View
+            </li>
+            <li class="sidebar-item">
+                <i class="fas fa-envelope"></i> Messages
+            </li>
+            <li class="sidebar-item">
+                <i class="fas fa-phone-alt"></i> Voice & Video Call
+            </li>
+            <li class="sidebar-item dropdown" onclick="showFinancialDropdown()">
+                <i class="fas fa-money-bill-wave"></i> Financial Activities
+                <div class="dropdown-content" id="financialDropdown">
+                    <a href="#" class="dropdown-item" onclick="showFinancialReport()">Financial Report</a>
+                    <a href="#" class="dropdown-item" onclick="showDepositModal()">Deposit Cash</a>
+                    <a href="#" class="dropdown-item" onclick="showSendCashModal()">Send/Transfer Cash</a>
+                </div>
+            </li>
+            <li class="sidebar-item" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </li>
+        </ul>
+    </div>
+    
+    <!-- Topbar -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <div class="datetime" id="datetime"></div>
+        </div>
+        <div class="topbar-right">
+            <div class="topbar-item dropdown">
+                <span><i class="fas fa-cog"></i> Settings</span>
+                <div class="dropdown-content">
+                    <a href="#" class="dropdown-item" onclick="showChangePasswordModal()">Change Password</a>
+                    <a href="#" class="dropdown-item">Save Settings</a>
+                    <a href="#" class="dropdown-item">Update Profile</a>
+                </div>
+            </div>
+            <div class="topbar-item dropdown">
+                <span><i class="fas fa-desktop"></i> System View</span>
+                <div class="dropdown-content">
+                    <div class="dropdown-item" id="systemDatetime"></div>
+                    <a href="#" class="dropdown-item" onclick="showCalendar()">Calendar</a>
+                    <a href="#" class="dropdown-item" onclick="showMap()">Google Map</a>
+                </div>
+            </div>
+            <div class="topbar-item dropdown">
+                <img src="profile-avatar.jpg" alt="User Avatar" class="avatar">
+                <span class="user-name">John Doe</span>
+                <div class="dropdown-content">
+                    <a href="#" class="dropdown-item" onclick="showProfileModal()">Profile Details</a>
+                    <a href="#" class="dropdown-item" onclick="showEditProfileModal()">Edit Profile</a>
+                    <div class="dropdown-item account-balance">Balance: $1,250.00</div>
+                </div>
+            </div>
+            <div class="topbar-item account-balance">
+                $1,250.00
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div id="systemView" style="display: none;">
+            <div class="system-info">
+                <div id="systemDatetimeDisplay"></div>
+            </div>
+            <div class="map-container" id="mapContainer">
+                <p>Google Map will be displayed here</p>
+            </div>
+            <div class="calendar-container" id="calendarContainer">
+                <p>Calendar will be displayed here</p>
+            </div>
+        </div>
+        
+        <div id="financialView" style="display: none;">
+            <div class="financial-card">
+                <h3>Financial Report</h3>
+                <div id="financialReportContent">
+                    <!-- Financial report content will be loaded here -->
+                </div>
+            </div>
+            
+            <div class="financial-card transaction-history">
+                <h3>Transaction History</h3>
+                <div id="transactionHistory">
+                    <!-- Transaction history will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('profileModal')">&times;</span>
+            <h2>Profile Details</h2>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img src="profile-avatar.jpg" alt="User Avatar" class="avatar" style="width: 80px; height: 80px;">
+            </div>
+            <div class="form-group">
+                <label>Name:</label>
+                <p id="profileName">John Doe</p>
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <p id="profileEmail">john.doe@example.com</p>
+            </div>
+            <div class="form-group">
+                <label>Date of Birth:</label>
+                <p id="profileDob">1990-05-15</p>
+            </div>
+            <div class="form-group">
+                <label>Account Balance:</label>
+                <p id="profileBalance" class="account-balance" style="display: inline-block;">$1,250.00</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('editProfileModal')">&times;</span>
+            <h2>Edit Profile</h2>
+            <div class="form-group">
+                <label for="editName">Name:</label>
+                <input type="text" id="editName" value="John Doe">
+            </div>
+            <div class="form-group">
+                <label for="editEmail">Email:</label>
+                <input type="email" id="editEmail" value="john.doe@example.com">
+            </div>
+            <div class="form-group">
+                <label for="editDob">Date of Birth:</label>
+                <input type="date" id="editDob" value="1990-05-15">
+            </div>
+            <div class="form-group">
+                <label for="editAvatar">Profile Image:</label>
+                <input type="file" id="editAvatar">
+            </div>
+            <button class="btn btn-primary" onclick="saveProfileChanges()">Save Changes</button>
+        </div>
+    </div>
+    
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('changePasswordModal')">&times;</span>
+            <h2>Change Password</h2>
+            <div class="form-group">
+                <label for="currentPassword">Current Password:</label>
+                <input type="password" id="currentPassword">
+            </div>
+            <div class="form-group">
+                <label for="newPassword">New Password:</label>
+                <input type="password" id="newPassword">
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm New Password:</label>
+                <input type="password" id="confirmPassword">
+            </div>
+            <button class="btn btn-primary" onclick="updatePassword()">Update Password</button>
+        </div>
+    </div>
+    
+    <!-- Financial Report Modal -->
+    <div id="financialReportModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('financialReportModal')">&times;</span>
+            <h2>Financial Report</h2>
+            <div id="financialReportDetails">
+                <div class="form-group">
+                    <label>Account Status:</label>
+                    <p style="color: green;">Active</p>
+                </div>
+                <div class="form-group">
+                    <label>Current Balance:</label>
+                    <p>$1,250.00</p>
+                </div>
+                <div class="form-group">
+                    <label>Last Transaction:</label>
+                    <p>Deposit of $500.00 on 2023-05-10</p>
+                </div>
+                <div class="form-group">
+                    <label>Monthly Spending:</label>
+                    <p>$750.00</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Deposit Cash Modal -->
+    <div id="depositModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('depositModal')">&times;</span>
+            <h2>Deposit Cash</h2>
+            <div class="form-group">
+                <label for="depositAmount">Amount:</label>
+                <input type="number" id="depositAmount" placeholder="Enter amount to deposit">
+            </div>
+            <div class="form-group">
+                <label for="depositMethod">Payment Method:</label>
+                <select id="depositMethod">
+                    <option value="credit_card">Credit Card</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="mobile_money">Mobile Money</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="processDeposit()">Deposit</button>
+        </div>
+    </div>
+    
+    <!-- Send Cash Modal -->
+    <div id="sendCashModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('sendCashModal')">&times;</span>
+            <h2>Send/Transfer Cash</h2>
+            <div class="form-group">
+                <label for="recipientType">Recipient Type:</label>
+                <select id="recipientType" onchange="updateRecipientFields()">
+                    <option value="internal">Internal Transfer</option>
+                    <option value="mpesa">M-Pesa</option>
+                    <option value="airtel">Airtel Money</option>
+                    <option value="telkom">Telkom Cash</option>
+                    <option value="bank">Bank Account</option>
+                </select>
+            </div>
+            <div class="form-group" id="recipientAccountGroup">
+                <label for="recipientAccount">Recipient Account:</label>
+                <input type="text" id="recipientAccount" placeholder="Enter account number/phone">
+            </div>
+            <div class="form-group" id="recipientNameGroup">
+                <label for="recipientName">Recipient Name:</label>
+                <input type="text" id="recipientName" placeholder="Enter recipient name">
+            </div>
+            <div class="form-group">
+                <label for="transferAmount">Amount:</label>
+                <input type="number" id="transferAmount" placeholder="Enter amount to transfer">
+            </div>
+            <div class="form-group">
+                <label for="transferNote">Note (Optional):</label>
+                <input type="text" id="transferNote" placeholder="Add a note">
+            </div>
+            <button class="btn btn-primary" onclick="processTransfer()">Send Money</button>
+        </div>
+    </div>
+    
     <script>
-        // Data Storage Keys
-        const STORAGE_KEYS = {
-            PROFILE: 'dashboard_profile_data',
-            SETTINGS: 'dashboard_settings',
-            MESSAGES: 'dashboard_messages'
-        };
-
-        // Default Data
-        const DEFAULT_DATA = {
-            profile: {
-                name: "John Doe",
-                email: "john.doe@example.com",
-                avatar: "https://via.placeholder.com/100"
-            },
-            settings: {
-                bgColor: "#f5f7fa",
-                sidebarColor: "#2c3e50",
-                notifications: "all"
-            },
-            messages: {
-                contacts: [
-                    {
-                        id: 1,
-                        name: "Sarah Johnson",
-                        avatar: "https://via.placeholder.com/40",
-                        lastMessage: "Hey, how are you?",
-                        messages: []
-                    },
-                    {
-                        id: 2,
-                        name: "Mike Peterson",
-                        avatar: "https://via.placeholder.com/40",
-                        lastMessage: "About the project...",
-                        messages: []
-                    }
-                ],
-                currentContact: 1
+        // Update datetime
+        function updateDateTime() {
+            const now = new Date();
+            const datetimeStr = now.toLocaleString();
+            document.getElementById('datetime').textContent = datetimeStr;
+            document.getElementById('systemDatetime').textContent = datetimeStr;
+            document.getElementById('systemDatetimeDisplay').textContent = datetimeStr;
+        }
+        
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+        
+        // Modal functions
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        function showProfileModal() {
+            showModal('profileModal');
+        }
+        
+        function showEditProfileModal() {
+            showModal('editProfileModal');
+        }
+        
+        function showChangePasswordModal() {
+            showModal('changePasswordModal');
+        }
+        
+        function showFinancialReport() {
+            showModal('financialReportModal');
+        }
+        
+        function showDepositModal() {
+            showModal('depositModal');
+        }
+        
+        function showSendCashModal() {
+            showModal('sendCashModal');
+        }
+        
+        function showSystemView() {
+            document.getElementById('systemView').style.display = 'block';
+            document.getElementById('financialView').style.display = 'none';
+        }
+        
+        function showFinancialView() {
+            document.getElementById('systemView').style.display = 'none';
+            document.getElementById('financialView').style.display = 'block';
+            // Load financial data
+            loadFinancialData();
+        }
+        
+        function showFinancialDropdown() {
+            // This is handled by CSS hover
+        }
+        
+        function showCalendar() {
+            alert("Calendar functionality would be implemented here");
+            // In a real implementation, this would load a calendar component
+        }
+        
+        function showMap() {
+            alert("Google Maps functionality would be implemented here");
+            // In a real implementation, this would load Google Maps
+        }
+        
+        function updateRecipientFields() {
+            const recipientType = document.getElementById('recipientType').value;
+            const accountGroup = document.getElementById('recipientAccountGroup');
+            const nameGroup = document.getElementById('recipientNameGroup');
+            
+            if (recipientType === 'internal') {
+                accountGroup.querySelector('label').textContent = 'Recipient Username:';
+                accountGroup.querySelector('input').placeholder = 'Enter username';
+                nameGroup.style.display = 'none';
+            } else {
+                accountGroup.querySelector('label').textContent = 'Recipient Phone/Account:';
+                accountGroup.querySelector('input').placeholder = 'Enter phone/account number';
+                nameGroup.style.display = 'block';
             }
-        };
-
-        // Load data from storage or initialize with defaults
-        function loadPersistentData() {
-            return {
-                profile: JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFILE)) || DEFAULT_DATA.profile,
-                settings: JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || DEFAULT_DATA.settings,
-                messages: JSON.parse(localStorage.getItem(STORAGE_KEYS.MESSAGES)) || DEFAULT_DATA.messages
-            };
         }
-
-        // Save data to storage
-        function savePersistentData(key, data) {
-            localStorage.setItem(key, JSON.stringify(data));
-            // In a real app, you would also send this to your backend API
-            console.log(`Saving to server (simulated): ${key}`, data);
+        
+        function saveProfileChanges() {
+            const newName = document.getElementById('editName').value;
+            const newEmail = document.getElementById('editEmail').value;
+            const newDob = document.getElementById('editDob').value;
+            
+            // Update profile display
+            document.getElementById('profileName').textContent = newName;
+            document.getElementById('profileEmail').textContent = newEmail;
+            document.getElementById('profileDob').textContent = newDob;
+            
+            // Update topbar display
+            document.querySelector('.user-name').textContent = newName;
+            
+            alert('Profile changes saved successfully!');
+            closeModal('editProfileModal');
         }
-
-        // Initialize application
-        function initApp() {
-            // Load all persistent data
-            const persistentData = loadPersistentData();
+        
+        function updatePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
             
-            // Apply settings first
-            applySettings(persistentData.settings);
+            if (newPassword !== confirmPassword) {
+                alert("New passwords don't match!");
+                return;
+            }
             
-            // Initialize profile section
-            initProfile(persistentData.profile);
-            
-            // Initialize messages section
-            initMessages(persistentData.messages);
-            
-            // Initialize settings section
-            initSettings(persistentData.settings);
-            
-            // Set up UI event handlers
-            setupEventHandlers();
+            // In a real app, you would validate current password and update it
+            alert('Password updated successfully!');
+            closeModal('changePasswordModal');
         }
-
-        // Apply visual settings
-        function applySettings(settings) {
-            document.documentElement.style.setProperty('--bg-color', settings.bgColor);
-            document.documentElement.style.setProperty('--sidebar-color', settings.sidebarColor);
+        
+        function processDeposit() {
+            const amount = document.getElementById('depositAmount').value;
+            const method = document.getElementById('depositMethod').value;
+            
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            // In a real app, you would process the deposit
+            alert(`Deposit of $${amount} via ${method} is being processed`);
+            closeModal('depositModal');
         }
-
-        // Profile section
-        function initProfile(profileData) {
-            // Update UI with profile data
-            document.getElementById('sidebarName').textContent = profileData.name;
-            document.getElementById('sidebarEmail').textContent = profileData.email;
-            document.getElementById('sidebarAvatar').src = profileData.avatar;
-            document.getElementById('avatarPreview').src = profileData.avatar;
-            document.getElementById('fullName').value = profileData.name;
-            document.getElementById('email').value = profileData.email;
+        
+        function processTransfer() {
+            const type = document.getElementById('recipientType').value;
+            const account = document.getElementById('recipientAccount').value;
+            const name = document.getElementById('recipientName').value;
+            const amount = document.getElementById('transferAmount').value;
+            const note = document.getElementById('transferNote').value;
+            
+            if (!account || !amount || amount <= 0) {
+                alert('Please fill all required fields with valid values');
+                return;
+            }
+            
+            // In a real app, you would process the transfer
+            alert(`Transfer of $${amount} to ${account} (${type}) is being processed`);
+            closeModal('sendCashModal');
         }
-
-        // Messages section
-        function initMessages(messagesData) {
-            const contactsList = document.querySelector('.contacts-list');
-            contactsList.innerHTML = '';
+        
+        function loadFinancialData() {
+            // Simulate loading financial data
+            const reportContent = `
+                <div class="form-group">
+                    <label>Account Status:</label>
+                    <p style="color: green;">Active</p>
+                </div>
+                <div class="form-group">
+                    <label>Current Balance:</label>
+                    <p>$1,250.00</p>
+                </div>
+                <div class="form-group">
+                    <label>This Month's Transactions:</label>
+                    <p>5 transactions</p>
+                </div>
+            `;
             
-            messagesData.contacts.forEach(contact => {
-                const contactElement = document.createElement('div');
-                contactElement.className = `contact ${contact.id === messagesData.currentContact ? 'active' : ''}`;
-                contactElement.innerHTML = `
-                    <img src="${contact.avatar}" alt="User" class="contact-avatar">
-                    <div class="contact-info">
-                        <div class="contact-name">${contact.name}</div>
-                        <div class="contact-lastmsg">${contact.lastMessage}</div>
-                    </div>
-                `;
-                contactElement.addEventListener('click', () => selectContact(contact.id));
-                contactsList.appendChild(contactElement);
-            });
+            const transactionContent = `
+                <div class="transaction-item">
+                    <span>Deposit</span>
+                    <span class="transaction-amount positive">+$500.00</span>
+                </div>
+                <div class="transaction-item">
+                    <span>Grocery Store</span>
+                    <span class="transaction-amount negative">-$75.50</span>
+                </div>
+                <div class="transaction-item">
+                    <span>Utility Bill</span>
+                    <span class="transaction-amount negative">-$120.00</span>
+                </div>
+                <div class="transaction-item">
+                    <span>Salary</span>
+                    <span class="transaction-amount positive">+$2,500.00</span>
+                </div>
+                <div class="transaction-item">
+                    <span>Restaurant</span>
+                    <span class="transaction-amount negative">-$45.75</span>
+                </div>
+            `;
+            
+            document.getElementById('financialReportContent').innerHTML = reportContent;
+            document.getElementById('transactionHistory').innerHTML = transactionContent;
         }
-
-        // Settings section
-        function initSettings(settingsData) {
-            document.getElementById('notifications').value = settingsData.notifications;
-            
-            // Select the current color option
-            document.querySelectorAll('.color-option').forEach(option => {
-                option.classList.remove('selected');
-                if (option.dataset.bg === settingsData.bgColor) {
-                    option.classList.add('selected');
-                }
-            });
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // In a real app, this would redirect to login page
+                alert('Redirecting to login page...');
+                // window.location.href = 'index.html';
+            }
         }
-
-        // Event handlers setup
-        function setupEventHandlers() {
-            // Profile avatar upload
-            document.getElementById('uploadBtn').addEventListener('click', () => {
-                document.getElementById('avatarUpload').click();
-            });
-            
-            document.getElementById('avatarUpload').addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file && file.size <= 2 * 1024 * 1024) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        const newAvatar = event.target.result;
-                        document.getElementById('avatarPreview').src = newAvatar;
-                        
-                        // Update persistent data
-                        const profileData = loadPersistentData().profile;
-                        profileData.avatar = newAvatar;
-                        savePersistentData(STORAGE_KEYS.PROFILE, profileData);
-                        
-                        // Update sidebar avatar
-                        document.getElementById('sidebarAvatar').src = newAvatar;
-                    };
-                    reader.readAsDataURL(file);
-                } else if (file) {
-                    alert('Please select an image smaller than 2MB');
-                }
-            });
-            
-            // Profile form submission
-            document.getElementById('profileForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const name = document.getElementById('fullName').value.trim();
-                const email = document.getElementById('email').value.trim();
-                
-                if (name && /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-                    const profileData = {
-                        name,
-                        email,
-                        avatar: loadPersistentData().profile.avatar
-                    };
-                    
-                    savePersistentData(STORAGE_KEYS.PROFILE, profileData);
-                    initProfile(profileData);
-                    alert('Profile updated successfully!');
-                } else {
-                    alert('Please enter valid name and email');
-                }
-            });
-            
-            // Settings form submission
-            document.getElementById('settingsForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const settingsData = {
-                    ...loadPersistentData().settings,
-                    notifications: document.getElementById('notifications').value
-                };
-                
-                savePersistentData(STORAGE_KEYS.SETTINGS, settingsData);
-                alert('Settings saved successfully!');
-            });
-            
-            // Color selection
-            document.querySelectorAll('.color-option').forEach(option => {
-                option.addEventListener('click', function() {
-                    const settingsData = {
-                        bgColor: this.dataset.bg,
-                        sidebarColor: this.dataset.sidebar,
-                        notifications: loadPersistentData().settings.notifications
-                    };
-                    
-                    savePersistentData(STORAGE_KEYS.SETTINGS, settingsData);
-                    applySettings(settingsData);
-                    
-                    document.querySelectorAll('.color-option').forEach(opt => {
-                        opt.classList.remove('selected');
-                    });
-                    this.classList.add('selected');
-                });
-            });
-            
-            // Reset settings
-            document.getElementById('resetSettings').addEventListener('click', function() {
-                savePersistentData(STORAGE_KEYS.SETTINGS, DEFAULT_DATA.settings);
-                initSettings(DEFAULT_DATA.settings);
-                applySettings(DEFAULT_DATA.settings);
-            });
-            
-            // Section navigation
-            document.querySelectorAll('.sidebar-menu li[data-section]').forEach(item => {
-                item.addEventListener('click', function() {
-                    showSection(this.getAttribute('data-section'));
-                });
-            });
-            
-            // Logout
-            document.getElementById('logoutBtn').addEventListener('click', function() {
-                if (confirm('Are you sure you want to logout?')) {
-                    // In a real app, you would call your logout API here
-                    window.location.href = 'index.html';
-                }
-            });
-        }
-
-        // Show section
-        function showSection(sectionId) {
-            // Hide all sections
-            document.querySelectorAll('.profile-content, .messages-content, .settings-content').forEach(section => {
-                section.classList.add('hidden');
-            });
-            
-            // Show selected section
-            document.getElementById(`${sectionId}Section`).classList.remove('hidden');
-            
-            // Update active menu item
-            document.querySelectorAll('.sidebar-menu li[data-section]').forEach(item => {
-                item.classList.remove('active-menu');
-                if (item.getAttribute('data-section') === sectionId) {
-                    item.classList.add('active-menu');
-                }
-            });
-            
-            // Update title
-            document.getElementById('sectionTitle').textContent = 
-                document.querySelector('.active-menu i').parentElement.textContent.trim();
-        }
-
-        // Select contact
-        function selectContact(contactId) {
-            const messagesData = loadPersistentData().messages;
-            messagesData.currentContact = contactId;
-            savePersistentData(STORAGE_KEYS.MESSAGES, messagesData);
-            initMessages(messagesData);
-        }
-
-        // Initialize the application when DOM is loaded
-        document.addEventListener('DOMContentLoaded', initApp);
+        
+        // Initialize
+        showSystemView();
+        updateRecipientFields();
     </script>
 </body>
 </html>
