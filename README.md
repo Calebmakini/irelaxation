@@ -5,15 +5,3 @@ for everyone.
 login now to express and experience 
 legitimate moments and get yourself lost 
 to an imaginary world
-<html> 
-<div class="login">
-  proceed to login
-<form action="home.php" method="post">
-<input type="email" placeholder="email address">
-<input type="password" placeholder="password">
-<button type="submit">login</button>
-
-
-
-
-</html>
